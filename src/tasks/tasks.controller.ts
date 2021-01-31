@@ -6,6 +6,8 @@ import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipes';
 import { Task } from './task.entitiy';
 import { TaskStatus } from './task-status.enum';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from '../auth/user.entitiy';
+import { GetUser } from 'src/auth/get-user';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
@@ -13,32 +15,45 @@ export class TasksController {
     constructor(private taskService: TasksService) {}
 
     @Get()
-    getTasks(@Query(ValidationPipe) filterDto: GetTasksFilterDto) {
-        return this.taskService.getTasks(filterDto);
+    getTasks(
+        @Query(ValidationPipe) filterDto: GetTasksFilterDto,
+        @GetUser() user: User,
+        ) {
+        return this.taskService.getTasks(filterDto, user);
     }
 
     @Get('/:id')
-    getTaskById(@Param('id', ParseIntPipe) id: number): Promise<Task> {
-        return this.taskService.getTaskById(id);
+    getTaskById(
+        @Param('id', ParseIntPipe) id: number,
+        @GetUser() user: User,
+        ): Promise<Task> {
+        return this.taskService.getTaskById(id, user);
     }
 
     @Post()
     @UsePipes(ValidationPipe)
-    createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
-        return this.taskService.createTask(createTaskDto);
+    createTask(
+        @Body() createTaskDto: CreateTaskDto,
+        @GetUser() user: User,
+        ): Promise<Task> {
+        return this.taskService.createTask(createTaskDto, user);
     }
 
     @Delete('/:id')
-    deleteTaskById(@Param('id', ParseIntPipe) id: number): Promise<void> {
-         return this.taskService.deleteTaskById(id);
+    deleteTaskById(
+        @Param('id', ParseIntPipe) id: number,
+        @GetUser() user: User,
+    ): Promise<void> {
+         return this.taskService.deleteTaskById(id, user);
     }
 
     @Patch('/:id/status')
     async updateTaskById(
         @Param('id', ParseIntPipe) id: number,
         @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+        @GetUser() user: User,
     ): Promise<Task> {
-        return this.taskService.updateTask(id,status);
+        return this.taskService.updateTask(id, status, user);
     }
 
     // DB olmadan database ornekleri!!!!
